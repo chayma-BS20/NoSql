@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mongo-arbiter:
+    image: mongo:7.0
+    container_name: mongo_arb
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    networks:
+      - mongo-net
+  mongo1:
+    image: mongo:7.0 # lancement de deamon docker 
+    container_name: mongo1
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"] # Pour activer le mode replicaset on avec la commande -replSet avec le nom rs0specifier le nom de replicaset
+    ports:
+      - 27017:27017   # On mappe le port 27017 du conteneur vers le 27017 de la machine hote
+
+    networks:
+      - mongo-net
+    volumes:
+      - mongo1_data:/data/db        # Persistance des données 
+
+
+  mongo2:
+    image: mongo:7.0
+    container_name: mongo2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      # On utilise un port différent sur Windows pour éviter les conflits
+      - 27018:27017
+    networks:
+      - mongo-net
+    volumes:
+      - mongo2_data:/data/db
+
+  mongo3:
+    image: mongo:7.0
+    container_name: mongo3
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      # Encore un port différent sur Windows
+      - 27019:27017
+    networks:
+      - mongo-net
+    volumes:
+      - mongo3_data:/data/db
+
+# Définition du réseau interne pour qu'ils se parlent entre eux
+networks:
+  mongo-net:
+    driver: bridge
+
+# Définition des volumes pour stocker les données
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
